@@ -8,6 +8,8 @@ import multiprocessing
 import operator
 from deap import base, creator, gp
 import plot_utils
+from plot_utils import plot_history, save_tree_and_outputs_dot
+
 sys.setrecursionlimit(10000)
 from collections.abc import Callable
 parser = argparse.ArgumentParser(
@@ -552,7 +554,7 @@ def main():
                 except Exception:
                     correct = False
                     break
-
+            save_tree_and_outputs_dot(task_name, best, func, task["test"])
             results.append({
                 "task_name": task_name,
                 "best_program": str(best),
