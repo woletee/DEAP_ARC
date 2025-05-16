@@ -1,7 +1,7 @@
 [
   {
     "task_name": "aabf363d (2).json",
-    "best_program": "move(ARG0, sfilter(sfilter(mfilter(EmptySet, identity), compose(palette, shift)), compose(compose(sfilter, identity), rbind(shift, shift))), DOWN)",
-    "solution_found": false
+    "best_program": "cellwise(replace(replace(replace(fill(ARG0, F, EmptySet), leastcolor(ARG0), leastcolor(righthalf(lefthalf(ARG0)))), leastcolor(ARG0), 8), leastcolor(righthalf(ARG0)), leastcolor(ARG0)), cellwise(replace(ARG0, leastcolor(righthalf(ARG0)), hline_pred(EmptySet)), ARG0, leastcolor(ARG0)), hline_pred(EmptySet))",
+    "solution_found": true
   }
 ]

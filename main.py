@@ -231,7 +231,6 @@ def _init_task(task):
     global current_task
     current_task = task
 
-# === 5) MAIN LOOP ===
 
 def main():
 
@@ -274,15 +273,12 @@ def main():
             stats = tools.Statistics(lambda ind: ind.fitness.values)
             stats.register("avg", np.mean)
             stats.register("max", np.max)
-
-            # initial evaluation
             fitnesses = toolbox.map(toolbox.evaluate, pop)
             for ind, fit in zip(pop, fitnesses):
                 ind.fitness.values = fit
 
             history = []
             for gen in range(1, GENERATIONS + 1):
-                # dynamic cx/mut scheduling
                 cxpb = CX0 * (1 - gen/GENERATIONS)
                 mutpb = MUT0 + (1 - MUT0)*(gen/GENERATIONS)
                 if cxpb + mutpb > 1.0:
