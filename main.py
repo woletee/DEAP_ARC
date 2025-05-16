@@ -188,7 +188,17 @@ def _init_task(task):
     current_task = task
 
 # === 5) MAIN LOOP ===
+
 def main():
+
+    """
+    1) TASK LOADING & WORKER INITIALIZATION
+    ────────────────────────────────────────────
+    • Discover all JSON task files in the training folder.
+    • Prepare a results list to collect outcomes per task.
+    • Initialize a multiprocessing pool per task, setting `current_task`.
+    """
+      
     training_folder = "./training/"
     task_files = glob.glob(os.path.join(training_folder, "*.json"))
     results = []
@@ -200,6 +210,20 @@ def main():
             task = json.load(f)
 
         with multiprocessing.Pool(initializer=_init_task, initargs=(task,)) as pool:
+            """
+            2) EVOLUTIONARY OPTIMIZATION PER TASK
+            ────────────────────────────────────────
+            • Create initial population, Hall-of-Fame, and statistics trackers.
+            • Perform initial fitness evaluation.
+            • For each generation:
+                Adapt crossover and mutation rates over time.
+                Generate offspring via varOr (crossover + mutation).
+                Evaluate offspring fitness in parallel.
+                Update the Hall-of-Fame (elitism).
+                Select the next generation (tournament).
+                Record stats and print progress.
+            • Plot fitness history.
+            """
             toolbox.register("map", pool.map)
             pop = toolbox.population()
             hof = tools.HallOfFame(5)
@@ -237,7 +261,13 @@ def main():
 
             plot_utils.plot_history(history, task_name)
 
-            # test best individual
+            """
+            3) POST-EVOLUTION TESTING & RESULTS SAVING
+            ──────────────────────────────────────────────
+            • Compile the best individual into a function.
+            • Test it on held-out examples.
+            • Record success and append to the results list.
+            """
             best = hof[0]
             func = toolbox.compile(expr=best)
             correct = True
