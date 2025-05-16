@@ -12,6 +12,7 @@ import deap.cma    as cma
 import hodel_dsl as dsl   
 import multiprocessing
 import operator
+import plot_utils
 sys.setrecursionlimit(10000)
 
 # === PARSE COMMAND-LINE ARGS ===
@@ -91,28 +92,53 @@ def rand_int():
     return np.random.randint(0, 10)
 pset.addEphemeralConstant("randInt", rand_int, int)
 
-# === 3) TOOLBOX ===
+
+
+
+
+"""
+DEAP Toolbox Configuration
+──────────────────────────
+This block sets up DEAP's central registry of genetic programming operations.
+Instead of hard-coding function calls throughout script, we register each
+operator under a string key. Later, we can invoke them uniformly via toolbox.NAME().
+
+- compile:   Turns a GP tree into a runnable function by wiring up  DSL primitives.
+- select:    Chooses parents via tournament selection (tournsize=5).
+- mate:      Performs one-point subtree crossover on matching node types.
+- expr_mut:  Generates a “full” tree up to depth 3 for use in mutation.
+- mutate:    Replaces a random subtree with a new one from expr_mut, preserving types.
+- decorate:  Wraps mate and mutate to enforce a maximum tree height (Bloat Control).
+
+* just call toolbox.population(), toolbox.compile(), toolbox.select(),
+toolbox.mate(), and toolbox.mutate() without worrying about their inner workings.
+"""
 toolbox = base.Toolbox()
 toolbox.register("compile", gp.compile, pset=pset)
 toolbox.register("select", tools.selTournament, tournsize=5)
 toolbox.register("mate",   gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=3)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-
-# Enforce max tree height for crossover & mutation
 toolbox.decorate("mate",   gp.staticLimit(operator.attrgetter("height"), MAX_HEIGHT))
 toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter("height"), MAX_HEIGHT))
+
+
 
 # Population init parameters
 POP_SIZE = 100
 INIT_MIN, INIT_MAX = 2, 8
-toolbox.register(
-    "population",
-    tools.initRepeat,
-    list,
-    lambda: creator.Individual(gp.genHalfAndHalf(pset, min_=INIT_MIN, max_=INIT_MAX)),
-    n=POP_SIZE
-)
+"""
+Population Initialization
+─────────────────────────
+Registers how to build the initial population of candidate programs.
+- initRepeat: repeatedly calls the provided generator function to fill a list.
+- The generator: creates a new Individual by growing a half and half GP tree
+  (mixing “full” and “grow” methods-refer to the deap gp.py) with depth between INIT_MIN and INIT_MAX.
+- n=POP_SIZE: produces exactly POP_SIZE individuals for the starting population.
+"""
+toolbox.register("population", tools.initRepeat, list, 
+                 lambda: creator.Individual(gp.genHalfAndHalf(pset, min_=INIT_MIN, max_=INIT_MAX)), n=POP_SIZE)
+
 
 """
     DEAP_custom “evaluate_task” function:
@@ -146,8 +172,17 @@ def evaluate_task(individual):
             pass
     return (total,)
 
+"""
+Register the fitness evaluation function that scores each individual via evaluate_task
+"""
 toolbox.register("evaluate", evaluate_task)
 
+
+
+
+"""""
+used during parallel evaluation
+"""""
 def _init_task(task):
     global current_task
     current_task = task
@@ -166,7 +201,6 @@ def main():
 
         with multiprocessing.Pool(initializer=_init_task, initargs=(task,)) as pool:
             toolbox.register("map", pool.map)
-
             pop = toolbox.population()
             hof = tools.HallOfFame(5)
             stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -201,21 +235,7 @@ def main():
                 history.append(record)
                 print(f"Gen {gen} | Max {record['max']} | Avg {record['avg']:.1f}")
 
-            # plot evolution curve
-            import matplotlib.pyplot as plt
-            generations = list(range(1, len(history)+1))
-            max_fitness = [r['max'] for r in history]
-            avg_fitness = [r['avg'] for r in history]
-
-            plt.figure(figsize=(10, 6))
-            plt.plot(generations, max_fitness, label="Best Fitness")
-            plt.plot(generations, avg_fitness, label="Average Fitness")
-            plt.xlabel("Generation")
-            plt.ylabel("Fitness")
-            plt.title(f"Evolution on {task_name}")
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+            plot_utils.plot_history(history, task_name)
 
             # test best individual
             best = hof[0]

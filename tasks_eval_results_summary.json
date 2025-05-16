@@ -1,7 +1,7 @@
 [
   {
     "task_name": "aabf363d (2).json",
-    "best_program": "cover(ARG0, difference(asobject(dedupe(ARG0)), asindices(ARG0)))",
-    "solution_found": false
+    "best_program": "replace(replace(cellwise(ARG0, ARG0, leastcolor(vmirror(vmirror(ARG0)))), leastcolor(ARG0), hline_pred(EmptySet)), leastcolor(cellwise(cellwise(ARG0, ARG0, T), vmirror(ARG0), hline_pred(EmptySet))), leastcolor(lefthalf(ARG0)))",
+    "solution_found": true
   }
 ]
