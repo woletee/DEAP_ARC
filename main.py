@@ -15,7 +15,16 @@ import operator
 import plot_utils
 sys.setrecursionlimit(10000)
 
-# === PARSE COMMAND-LINE ARGS ===
+"""
+1) PARSE COMMAND-LINE ARGUMENTS
+────────────────────────────────
+Uses Python's argparse to allow users to override default GP hyperparameters:
+  • --max_height / -H : Maximum allowed tree height (default 70)
+  • --cx_rate    / -C : Initial crossover probability (default 0.5)
+  • --mut_rate   / -M : Initial mutation probability (default 0.4)
+  • --generations / -G : Number of generations to evolve (default 100)
+Parsed values override the hard-coded constants in the script.
+"""
 parser = argparse.ArgumentParser(
     description="Run genetic programming over all tasks in ./training/"
 )
@@ -45,7 +54,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# Override constants from args
+""" constants from args
+"""
 MAX_HEIGHT  = args.max_height
 CX0         = args.cx_rate
 MUT0        = args.mut_rate
@@ -58,36 +68,70 @@ for name in ("FitnessMax", "Individual"):
     if name in creator.__dict__:
         delattr(creator, name)
 
-# 1a) Fitness: maximize a single scalar
+
+
+"""
+ DEFINE FITNESS & INDIVIDUAL
+─────────────────────────────────
+• creator.create("FitnessMax", base.Fitness, weights=(1.0,)) (refer to creator.py ):
+  Defines a new fitness class where higher scalar values are better (single-objective maximization).
+• creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)(refer to gp.py):
+  Defines an Individual type as a GP tree whose .fitness attribute uses the FitnessMax class.
+This hooks DEAP's selection and comparison mechanisms to the problem of maximizing correct outputs.
+"""
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 
-# 1b) Primitive set typing
-pset = gp.PrimitiveSetTyped("MAIN", [tuple], tuple)
+
+
+
+
 
 def identity(x):
     return x
+"""
+2) Add primitives & terminals from hodel_dsl.py or ice_cuber.py
+─────────────────────────────────────────
+• Each call to `addPrimitive(python_function, input_types, output_type, string_name)` registers a DSL function
+  as a GP node, specifying exactly what input types it accepts and what type it returns.
+• `addTerminal(value, value_type, string_name)` registers constant values or zero-ary functions.
+• This enforces **strict typing** at tree-construction time: you can only connect subtrees
+  whose output type matches the primitive's expected input type.
+By assembling these DSL operations in the primitive set, GP can build complex,
+type-safe programs that manipulate grids, colors, and objects per the task logic.
 
-# 2) Add primitives & terminals from your DSL
-pset.addPrimitive(dsl.hline,      [frozenset],                bool,      name="hline_pred")
+Make sure you know the name of the DSL , the input type, output type when we add the primitves into the this set
+Then we can as many DSLs as we have 
+"""
+pset = gp.PrimitiveSetTyped("MAIN", [tuple], tuple)
+pset.addPrimitive(dsl.hline,[frozenset],bool,name="hline_pred")
 pset.addTerminal(identity, object, name="IDENTITY")
 pset.addPrimitive(dsl.objects,  [tuple, bool, bool, bool], frozenset, name="objects")
 pset.addTerminal(frozenset(), frozenset, name="EmptySet")
-pset.addPrimitive(dsl.replace,    [tuple, int, int],        tuple,     name="replace")
-pset.addPrimitive(dsl.leastcolor, [tuple],                  int,       name="leastcolor")
-pset.addPrimitive(dsl.fill,       [tuple, int, frozenset],  tuple,     name="fill")
-pset.addPrimitive(dsl.vmirror,    [tuple],                  tuple,     name="vmirror")
-pset.addPrimitive(dsl.lefthalf,   [tuple],                  tuple,     name="lefthalf")
-pset.addPrimitive(dsl.righthalf,  [tuple],                  tuple,     name="righthalf")
-pset.addPrimitive(dsl.cellwise,   [tuple, tuple, int],      tuple,     name="cellwise")
+pset.addPrimitive(dsl.replace, [tuple, int, int],tuple,name="replace")
+pset.addPrimitive(dsl.leastcolor,[tuple],int, name="leastcolor")
+pset.addPrimitive(dsl.fill, [tuple, int, frozenset],  tuple, name="fill")
+pset.addPrimitive(dsl.vmirror,[tuple],tuple, name="vmirror")
+pset.addPrimitive(dsl.lefthalf, [tuple],tuple, name="lefthalf")
+pset.addPrimitive(dsl.righthalf,[tuple],tuple, name="righthalf")
+pset.addPrimitive(dsl.cellwise,[tuple, tuple, int],tuple,name="cellwise")
 
-# Add integer and boolean constants
+
+
+"""
+ Add integer and boolean constants, plus an ephemeral random-int generator
+────────────────────────────────────────────────────────────────────────
+• addTerminal(value, type, name) registers literal constants-in the case of ARC -could be color (0-9) that GP trees can use.
+   Here integers 0-9 are added as terminals of type int, named “0” through “9”.
+   also the Boolean constants `True` and False of type `bool`, named “T” and “F”.
+• addEphemeralConstant(name, generator, type) registers a zero-argument “constant”
+  whose value is re-drawn each time a new tree is created(refer to gp.py).
+   randInt produces a random integer in [0,10) for radmoness- during the mutation and cross-over process.
+"""
 for i in range(10):
     pset.addTerminal(i, int, name=str(i))
 pset.addTerminal(True,  bool, name="T")
 pset.addTerminal(False, bool, name="F")
-
-# Ephemeral random int generator
 def rand_int():
     return np.random.randint(0, 10)
 pset.addEphemeralConstant("randInt", rand_int, int)
