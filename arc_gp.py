@@ -558,7 +558,7 @@ def main():
                 "best_program": str(best),
                 "solution_found": correct
             })
-            print(f"{task_name} -> {'✔' if correct else '✘'}")
+            print(f"{task_name} -> {'Correct-Solution Found' if correct else 'Failed-No Solution Found'}")
 
     # save summary in to json
     with open("tasks_eval_results_summary.json", "w") as f:
