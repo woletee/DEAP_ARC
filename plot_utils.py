@@ -5,7 +5,7 @@ def plot_history(history, task_name):
     """
     Plots and saves the evolution of fitness over generations.
     
-    :param history: List of stat-dicts with keys 'avg' and 'max'.
+    :param history: aList of stat-dicts with keys 'avg' and 'max'.
     :param task_name: Name of the current task (used in plot title and filename).
     """
     generations = list(range(1, len(history) + 1))
