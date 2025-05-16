@@ -14,8 +14,7 @@ from typing import (
     Iterable
 )
 from collections.abc import Callable
-
-# Optional wrapper types
+#optional
 class GridList(list):
     """Used by some DSL primitives that return lists of grids."""
     pass
@@ -42,10 +41,8 @@ class Grid:
 Colour = int
 
 
-# 2) Build your PSET over Python-native tuple type
 pset = gp.PrimitiveSetTyped("MAIN", [tuple], tuple)
 
-# --- Terminals returning callables ---
 pset.addTerminal(dsl.contained, Callable, name="contained")
 pset.addTerminal(dsl.palette,   Callable, name="palette")
 pset.addTerminal(dsl.ulcorner,  Callable, name="ulcorner")
@@ -54,23 +51,20 @@ pset.addTerminal(dsl.center,    Callable, name="center")
 pset.addTerminal(dsl.shift,     Callable, name="shift")
 pset.addTerminal(dsl.identity,  Callable, name="identity")
 
-# --- Grid primitives ---
 pset.addPrimitive(dsl.vconcat,    [tuple, tuple],     tuple, name="vconcat")
 pset.addPrimitive(dsl.vmirror,    [tuple],            tuple, name="vmirror")
 pset.addPrimitive(dsl.hmirror,    [tuple],            tuple, name="hmirror")
 pset.addPrimitive(dsl.bottomhalf, [tuple],            tuple, name="bottomhalf")
 
-# --- Object‐set and tuple primitives ---
 pset.addPrimitive(dsl.objects,  [tuple, bool, bool, bool], frozenset, name="objects")
 pset.addPrimitive(dsl.astuple,  [int, int],                   tuple,     name="astuple")
 pset.addPrimitive(dsl.initset,  [object],                     frozenset, name="initset")
 pset.addPrimitive(dsl.insert,   [object, frozenset],          frozenset, name="insert")
 
-# --- Binder and composition primitives ---
 pset.addPrimitive(dsl.lbind,    [Callable, object], Callable, name="lbind")
 pset.addPrimitive(dsl.compose,  [Callable, Callable], Callable, name="compose")
 pset.addPrimitive(dsl.rbind,    [Callable, object], Callable, name="rbind")
-# fork: combines two unary functions via an outer binary
+
 
 from typing import Callable
 
@@ -151,17 +145,14 @@ pset.addPrimitive(dsl.vupscale,       [tuple, int],               tuple,     nam
 pset.addPrimitive(dsl.width,          [tuple],                    int,       name="width")
 pset.addPrimitive(dsl.width,          [frozenset],                int,       name="width_obj")
 
-# === Indices Transformations ===
 pset.addPrimitive(dsl.asindices,    [tuple],               frozenset, name="asindices")
 pset.addPrimitive(dsl.occurrences,  [tuple, frozenset],    frozenset, name="occurrences")
 pset.addPrimitive(dsl.trim,         [tuple],               tuple,     name="trim")
 
-# === Grid Editing ===
 pset.addPrimitive(dsl.cover,        [tuple, frozenset],    tuple,     name="cover")
 
 pset.addPrimitive(dsl.switch,       [tuple, int, int],     tuple,     name="switch")
 
-# === Patch Geometry ===
 pset.addPrimitive(dsl.center,       [frozenset],           tuple,     name="center")
 pset.addPrimitive(dsl.position,     [frozenset, frozenset],tuple,    name="position")
 pset.addPrimitive(dsl.inbox,        [frozenset],           frozenset, name="inbox")
@@ -169,16 +160,13 @@ pset.addPrimitive(dsl.outbox,       [frozenset],           frozenset, name="outb
 pset.addPrimitive(dsl.box,          [frozenset],           frozenset, name="box")
 pset.addPrimitive(dsl.gravitate,    [frozenset, frozenset],tuple,    name="gravitate")
 
-# === Container Merging ===
 pset.addPrimitive(dsl.merge,        [frozenset],           frozenset, name="merge")
 
-# === Numeric Aggregation ===
 pset.addPrimitive(dsl.maximum,      [frozenset],           int,       name="maximum")
 pset.addPrimitive(dsl.minimum,      [frozenset],           int,       name="minimum")
 pset.addPrimitive(dsl.valmax,       [frozenset, Callable], int,       name="valmax")
 pset.addPrimitive(dsl.valmin,       [frozenset, Callable], int,       name="valmin")
 
-# === Ray Casting ===
 pset.addPrimitive(dsl.shoot,        [tuple, tuple],        frozenset, name="shoot")
 
 Int = int
@@ -190,7 +178,6 @@ Func = Callable
 class Numerical:
     pass
 
-# Begin registration of missing primitives
 pset.addPrimitive(dsl.intersection, [frozenset, frozenset], frozenset, name="intersection")
 pset.addPrimitive(dsl.difference, [frozenset, frozenset], frozenset, name="difference")
 pset.addPrimitive(dsl.dedupe, [tuple], tuple, name="dedupe")
@@ -254,9 +241,8 @@ pset.addPrimitive(
     tuple,
     name="upscale_grid"
 )
-# the four corner‐cells of a patch
 pset.addPrimitive(
-    dsl.corners,              # corners(patch: Patch) -> Indices
+    dsl.corners,              
     [frozenset],
     frozenset,
     name="corners"
@@ -265,28 +251,22 @@ pset.addPrimitive(
 
 
 
-# --- Numeric inversion ---
 pset.addPrimitive(dsl.invert,   [int],    int,   name="invert_int")
 pset.addPrimitive(dsl.invert,   [tuple],  tuple, name="invert_tuple")
 
-# --- Boolean primitive ---
 pset.addPrimitive(dsl.contained, [object, object], bool, name="contained_bool")
 
-# --- Empty set terminal ---
 pset.addTerminal(frozenset(), frozenset, name="EmptySet")
 
-# --- Integer terminals ---
 for name, val in [
     ("ZERO", 0), ("ONE", 1), ("TWO", 2), ("THREE", 3),
     ("NEG_ONE", -1), ("NEG_TWO", -2),
 ]:
     pset.addTerminal(val, int, name=name)
 
-# --- Boolean terminals ---
 pset.addTerminal(False, bool, name="F")
 pset.addTerminal(True,  bool, name="T")
 
-# --- Direction‐tuple terminals ---
 for name, val in [
     ("DOWN",  (1,0)),
     ("RIGHT", (0,1)),
@@ -295,7 +275,6 @@ for name, val in [
 ]:
     pset.addTerminal(val, tuple, name=name)
 
-# Ephemeral random-int generator (pickleable)
 def rand_int():
     return np.random.randint(0, 10)
 pset.addEphemeralConstant("randInt", rand_int, int)
@@ -303,7 +282,6 @@ pset.addEphemeralConstant("randInt", rand_int, int)
 
 
 
-# === TOOLBOX & GP BOILERPLATE ===
 toolbox = base.Toolbox()
 toolbox.register("compile", gp.compile, pset=pset)
 import multiprocessing
@@ -329,9 +307,7 @@ def evaluate_task(individual):
             pass
     return (total,)
 
-# Register evaluation for multiprocessing
 toolbox.register("evaluate", evaluate_task)
-# === VARIATION OPERATORS ===
 POP_SIZE = 100
 INIT_MIN, INIT_MAX = 2, 6
 toolbox.register(
@@ -368,16 +344,13 @@ def decorate_limits(gen):
     toolbox.decorate("mate", gp.staticLimit(operator.attrgetter("height"), limit))
     toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter("height"), limit))
 
-# === SELECTION ===
 toolbox.register("select", tools.selTournament, tournsize=5)
 
-# ===  INITIALIZER ===
 def _init_task(task):
     """Initializer for worker processes to set the current task."""
     global current_task
     current_task = task
 
-# === MAIN EXECUTION ===
 def main():
     training_folder = "./training/"
     task_files = glob.glob(os.path.join(training_folder, "*.json"))
@@ -390,19 +363,16 @@ def main():
             task = json.load(f)
         with multiprocessing.Pool(initializer=_init_task, initargs=(task,)) as pool:
             toolbox.register("map", pool.map)
-            # Initialize population and hall-of-fame
             pop = toolbox.population()
             hof = tools.HallOfFame(5)
             stats = tools.Statistics(lambda ind: ind.fitness.values)
             stats.register("avg", np.mean)
             stats.register("max", np.max)
-            # Initial evaluation
             fitnesses = toolbox.map(toolbox.evaluate, pop)
             for ind, fit in zip(pop, fitnesses):
                 ind.fitness.values = fit
             CX0, MUT0 = 0.5, 0.6
             GENERATIONS = 100
-            # compute total cells across all train outputs
             sample_out = np.array(task["train"][0]["output"])
             target = len(task["train"]) * np.prod(sample_out.shape)
             history=[]
@@ -419,12 +389,9 @@ def main():
                     cxpb=cxpb,
                     mutpb=mutpb
                 )
-
-                # evaluate offspring
                 fitnesses = toolbox.map(toolbox.evaluate, offspring)
                 for ind, fit in zip(offspring, fitnesses):
                     ind.fitness.values = fit
-                # update hall-of-fame and select next gen
                 hof.update(offspring)
                 combined = offspring + list(hof)
                 pop = tools.selNSGA2(combined, POP_SIZE)
