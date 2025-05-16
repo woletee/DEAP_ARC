@@ -1,0 +1,7 @@
+[
+  {
+    "task_name": "aabf363d (2).json",
+    "best_program": "cover(ARG0, difference(asobject(dedupe(ARG0)), asindices(ARG0)))",
+    "solution_found": false
+  }
+]
