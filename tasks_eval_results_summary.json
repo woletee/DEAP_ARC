@@ -1,7 +1,7 @@
 [
   {
     "task_name": "aabf363d (2).json",
-    "best_program": "cellwise(replace(cellwise(cellwise(ARG0, cellwise(ARG0, ARG0, leastcolor(cellwise(ARG0, ARG0, 5))), leastcolor(ARG0)), replace(vmirror(ARG0), leastcolor(replace(cellwise(ARG0, ARG0, 0), hline_pred(EmptySet), leastcolor(ARG0))), leastcolor(ARG0)), F), 2, leastcolor(replace(ARG0, 8, 0))), replace(ARG0, leastcolor(ARG0), hline_pred(EmptySet)), leastcolor(ARG0))",
+    "best_program": "replace(replace(replace(ARG0, leastcolor(fill(ARG0, 4, EmptySet)), F), leastcolor(righthalf(ARG0)), leastcolor(fill(ARG0, 4, EmptySet))), F, hline_pred(EmptySet))",
     "solution_found": true
   }
 ]
