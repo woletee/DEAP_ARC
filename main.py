@@ -114,7 +114,24 @@ toolbox.register(
     n=POP_SIZE
 )
 
-# Evaluation helper
+"""
+    DEAP_custom “evaluate_task” function:
+    ─────────────────────
+    1. Compiles a GP tree into an executable Python function.
+    2. Runs it on each training example.
+    3. Counts the total number of correctly predicted cells.
+    4. Returns that count as a 1.tuple, matching the single-objective FitnessMax.
+
+    This differs from the `creator.FitnessMax` class itself—`FitnessMax` only *stores*
+    fitness values and knows how to compare them (higher is better), whereas
+    `evaluate_task` actually *computes* the raw score that gets stuffed into the `.fitness`
+    attribute by DEAP's engine.
+
+    They benefit each other because:
+     - `evaluate_task` produces a numeric performance measure.
+     - 'FitnessMax' wraps that measure and lets DEAP sort, compare, and select individuals
+       based on it.
+    """
 def evaluate_task(individual):
     func = toolbox.compile(expr=individual)
     total = 0
