@@ -1,0 +1,1 @@
+replace(fill(vmirror(replace(vmirror(ARG0), leastcolor(replace(ARG0, T, 4)), hline_pred(EmptySet))), 8, EmptySet), leastcolor(vmirror(replace(vmirror(ARG0), leastcolor(ARG0), hline_pred(EmptySet)))), leastcolor(fill(replace(ARG0, 1, 8), 7, EmptySet)))

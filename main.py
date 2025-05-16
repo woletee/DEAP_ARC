@@ -12,7 +12,9 @@ import deap.cma    as cma
 import hodel_dsl as dsl   
 import multiprocessing
 import operator
-import plot_utils
+import plot_utils 
+from plot_utils import plot_history, save_tree_and_outputs_dot
+
 sys.setrecursionlimit(10000)
 
 """
@@ -322,7 +324,7 @@ def main():
                 except Exception:
                     correct = False
                     break
-
+            save_tree_and_outputs_dot(task_name, best, func, task["test"])
             results.append({
                 "task_name": task_name,
                 "best_program": str(best),
